@@ -56,7 +56,9 @@
 
 给定噪声测量信号 $y = (y_1, y_2, \ldots, y_m)^T$，寻找平滑信号 $z = (z_1, z_2, \ldots, z_m)^T$ 使得：
 
-$$\min_z \sum_{i=1}^{m} w_i(y_i - z_i)^2 + \lambda \sum_{k=1}^{m-2} (\Delta^2 z_k)^2$$
+```math
+\min_z \sum_{i=1}^{m} w_i(y_i - z_i)^2 + \lambda \sum_{k=1}^{m-2} (\Delta^2 z_k)^2
+```
 
 其中：
 - $w_i$：第i个点的权重（通常为1或根据测量误差选择）
@@ -67,18 +69,22 @@ $$\min_z \sum_{i=1}^{m} w_i(y_i - z_i)^2 + \lambda \sum_{k=1}^{m-2} (\Delta^2 z_
 
 #### 矩阵形式
 
-令 $D$ 为（$m-2 \times m$）的**二阶差分矩阵**：
+令 $D$ 为 $m-2 \times m$ 的**二阶差分矩阵**：
 
-$$D = \begin{pmatrix}
+```math
+D = \begin{pmatrix}
 1 & -2 & 1 & 0 & \cdots & 0 \\
 0 & 1 & -2 & 1 & \cdots & 0 \\
 \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
 0 & \cdots & 0 & 1 & -2 & 1
-\end{pmatrix}$$
+\end{pmatrix}
+```
 
 目标函数可写为：
 
-$$S(z) = (y - z)^T W (y - z) + \lambda z^T D^T D z$$
+```math
+S(z) = (y - z)^T W (y - z) + \lambda z^T D^T D z
+```
 
 其中 $W = \text{diag}(w_1, w_2, \ldots, w_m)$ 是对角权重矩阵。
 
@@ -86,11 +92,15 @@ $$S(z) = (y - z)^T W (y - z) + \lambda z^T D^T D z$$
 
 对 $z$ 求偏导并令其为0：
 
-$$\frac{\partial S}{\partial z} = -2W(y - z) + 2\lambda D^T D z = 0$$
+```math
+\frac{\partial S}{\partial z} = -2W(y - z) + 2\lambda D^T D z = 0
+```
 
 整理得**法线方程**（Normal Equation）：
 
-$$(W + \lambda D^T D) z = W y$$
+```math
+(W + \lambda D^T D) z = W y
+```
 
 这是一个稀疏线性系统，其中系统矩阵 $(W + \lambda D^T D)$ 为五对角对称矩阵（SPD），可高效求解。
 
@@ -98,7 +108,9 @@ $$(W + \lambda D^T D) z = W y$$
 
 最优解 $z^*$ 满足：
 
-$$z^* = (W + \lambda D^T D)^{-1} W y$$
+```math
+z^* = (W + \lambda D^T D)^{-1} W y
+```
 
 - **λ = 0**：无约束，$z^* = W^{-1}W y = y$（完全拟合数据）
 - **λ 很小**：$z^*$ 接近 $y$，保留噪声
@@ -143,17 +155,26 @@ AsLS的关键思想：在权重中引入 **非对称性** $p$，使得：
 AsLS是一个 **迭代算法**：
 
 **初始化**（$k=0$）：
-$$z^{(0)} = \arg\min_z \sum w_i^{base}(y_i - z_i)^2 + \lambda(D z)^T(D z)$$
+```math
+z^{(0)} = \arg\min_z \sum w_i^{base}(y_i - z_i)^2 + \lambda(D z)^T(D z)
+```
 用基础权重 $w_i^{base}$ 进行标准Whittaker平滑。
 
 **迭代**（$k = 1, 2, \ldots, n_{iter}$）：
 
 1. **更新权重**：根据上一步的基线 $z^{(k-1)}$ 计算当前残差：
-   $$w_i^{(k)} = w_i^{base} \left[ p \cdot \mathbb{1}(y_i > z_i^{(k-1)}) + (1-p) \cdot \mathbb{1}(y_i < z_i^{(k-1)}) \right]$$
+
+   ```math
+   w_i^{(k)} = w_i^{base} \left[ p \cdot \mathbb{1}(y_i > z_i^{(k-1)}) + (1-p) \cdot \mathbb{1}(y_i < z_i^{(k-1)}) \right]
+   ```
+   
    其中 $\mathbb{1}(\cdot)$ 为示性函数（条件真时=1，假时=0）
 
 2. **拟合基线**：用更新的权重求解Whittaker平滑：
-   $$(W^{(k)} + \lambda D^T D) z^{(k)} = W^{(k)} y$$
+
+   ```math
+   (W^{(k)} + \lambda D^T D) z^{(k)} = W^{(k)} y
+   ```
 
 3. **检查收敛**：如果 $\| z^{(k)} - z^{(k-1)} \|$ 很小，停止迭代
 
@@ -175,7 +196,9 @@ $$z^{(0)} = \arg\min_z \sum w_i^{base}(y_i - z_i)^2 + \lambda(D z)^T(D z)$$
 
 #### 定义1：相减法（Subtraction Definition）
 
-$$\text{corrected}_{\text{sub}} = y - z_{\text{baseline}}$$
+```math
+\text{corrected}_{\text{sub}} = y - z_{\text{baseline}}
+```
 
 **物理意义**：
 - 表示原始信号与基线的 **绝对差值**
@@ -196,7 +219,9 @@ $$\text{corrected}_{\text{sub}} = y - z_{\text{baseline}}$$
 
 #### 定义2：相除法（Division/Relative Definition）
 
-$$\text{corrected}_{\text{div}} = \frac{y}{z_{\text{baseline}}} - 1$$
+```math
+\text{corrected}_{\text{div}} = \frac{y}{z_{\text{baseline}}} - 1
+```
 
 **物理意义**：
 - 表示原始信号相对基线的 **相对变化**
